@@ -22,6 +22,10 @@ public class ConsumerController {
     @Autowired
     EurekaClient client2;
 
+    @Autowired
+    LoadBalancerClient loadBalancerClient;
+
+
     @GetMapping("/hello")
     public String hello() {
         return "hello";
@@ -71,5 +75,17 @@ public class ConsumerController {
         }
 
         return "client4";
+    }
+
+    @GetMapping("client5")
+    public Object client5() {
+        // ribbon 完成客户端的负载均衡，它内部会过滤掉状态=down的节点
+        ServiceInstance instance = loadBalancerClient.choose("eureka-provider");
+        String url = "http://" + instance.getHost() + ":" + instance.getPort() + "/hello";
+        System.out.println("url: " + url);
+        RestTemplate restTemplate = new RestTemplate();
+        String response = restTemplate.getForObject(url, String.class);
+        System.out.println("resp: " + response);
+        return "client5";
     }
 }
