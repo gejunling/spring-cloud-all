@@ -7,11 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class ConsumerController {
@@ -24,6 +26,9 @@ public class ConsumerController {
 
     @Autowired
     LoadBalancerClient loadBalancerClient;
+
+    @Autowired
+    RestTemplate restTemplate;
 
 
     @GetMapping("/hello")
@@ -77,6 +82,7 @@ public class ConsumerController {
         return "client4";
     }
 
+    // RestTemplate之getForObject
     @GetMapping("client5")
     public Object client5() {
         // ribbon 完成客户端的负载均衡，它内部会过滤掉状态=down的节点
@@ -87,5 +93,29 @@ public class ConsumerController {
         String response = restTemplate.getForObject(url, String.class);
         System.out.println("resp: " + response);
         return response;
+    }
+
+    // RestTemplate之getForEntity
+    @GetMapping("client6")
+    public Object client6() {
+        // ribbon 完成客户端的负载均衡，它内部会过滤掉状态=down的节点
+        ServiceInstance instance = loadBalancerClient.choose("eureka-provider");
+        String url = "http://" + instance.getHost() + ":" + instance.getPort() + "/hello";
+        System.out.println("url: " + url);
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> entity = restTemplate.getForEntity(url, String.class);
+        System.out.println("resp: " + entity);
+        return "test response entity";
+    }
+
+    // RestTemplate之getForEntity
+    @GetMapping("client7")
+    public Object client7() {
+        // ribbon 完成客户端的负载均衡，它内部会过滤掉状态=down的节点
+        String url = "http://host.docker.internal:81/getMap";
+        //String url = "http://eureka-provider/getMap";
+        Map map = restTemplate.getForObject(url, Map.class);
+        System.out.println(map);
+        return "test response entity";
     }
 }
