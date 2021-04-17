@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.ge</groupId>
-    <artifactId>eureka-provider</artifactId>
+    <artifactId>eureka-provider-2</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>eureka-provider</name>
+    <name>eureka-provider-2</name>
     <description>Demo project for Spring Boot</description>
     <properties>
         <java.version>1.8</java.version>

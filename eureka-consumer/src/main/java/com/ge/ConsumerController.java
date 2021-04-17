@@ -86,6 +86,6 @@ public class ConsumerController {
         RestTemplate restTemplate = new RestTemplate();
         String response = restTemplate.getForObject(url, String.class);
         System.out.println("resp: " + response);
-        return "client5";
+        return response;
     }
 }
