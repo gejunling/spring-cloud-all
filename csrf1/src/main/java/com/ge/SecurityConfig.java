@@ -1,5 +1,8 @@
 package com.ge;
 
+import javax.sql.DataSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -7,8 +10,11 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 
@@ -20,6 +26,10 @@ import java.io.IOException;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Autowired
+    DataSource dataSource;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
@@ -70,21 +80,35 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrfTokenRepository(new HttpSessionCsrfTokenRepository());
     }
 
+    //@Override
+    //protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    //    JdbcUserDetailsManager manager = auth.
+    //            jdbcAuthentication()
+    //            .dataSource(dataSource).getUserDetailsService();
+    //    boolean userExists = manager.userExists("admin");
+    //    if (userExists) {
+    //        System.out.println("user: admin already exists");
+    //    } else {
+    //        manager.createUser(User.withUsername("admin")
+    //                .password(new BCryptPasswordEncoder().encode("123"))
+    //                .roles("admin")
+    //                .build());
+    //    }
+    //}
+
+    @Autowired
+    MyUserService userSrv;
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        // 配置用户的账号密码
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-        auth
-                .inMemoryAuthentication()
-                .withUser("admin").password(encoder.encode("admin")).roles("admin")
-                .and()
-                .withUser("test").password(encoder.encode("test")).roles("user");
-
+        auth.userDetailsService(userSrv);
     }
 
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+
 }
